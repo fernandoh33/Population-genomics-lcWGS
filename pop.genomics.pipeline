@@ -1,0 +1,8 @@
+#All analyses are though for low coverage WGS
+#run pca
+#generate the file with genotype likelihoods of variables sites, input for pcangsd
+./angsd -GL 2 -out genolike -nThreads 16 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1  -bam bam.filelist
+#run pcangsd
+
+
+#run admixture
