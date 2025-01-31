@@ -1,8 +1,15 @@
 #All analyses are though for low coverage WGS
 #run pca
 #generate the file with genotype likelihoods of variables sites, input for pcangsd
-./angsd -GL 2 -out genolike -nThreads 16 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1  -bam bam.filelist
-#run pcangsd
+#declare all variables
+nsites=
+nsamples=6
 
+#tutorial aca: https://github.com/EFox16/ngsLD-Tutorial
 
-#run admixture
+angsd -glf geno.file.glf.gz -fai reference.fa.fai -nInd $nind -doMajorMinor 1 \
+-doPost 1 -doMaf 1 -doGeno 32 -out geno.file -minMaf 0.05
+
+#filter for ld
+zcat geno.file.mafs.gz | cut -f 1,2 | tail -n +2 > geno.file_positions.txt
+
