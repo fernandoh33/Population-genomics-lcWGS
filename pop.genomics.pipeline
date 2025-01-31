@@ -2,14 +2,26 @@
 #run pca
 #generate the file with genotype likelihoods of variables sites, input for pcangsd
 #declare all variables
-nsites=
-nsamples=6
+REF=path_to your_reference
 
-#tutorial aca: https://github.com/EFox16/ngsLD-Tutorial
+#ngsLD tutorial: https://github.com/EFox16/ngsLD-Tutorial
+#installing ngsLD
 
-angsd -glf geno.file.glf.gz -fai reference.fa.fai -nInd $nind -doMajorMinor 1 \
--doPost 1 -doMaf 1 -doGeno 32 -out geno.file -minMaf 0.05
+ngsLD=full_path_to_ngsLD/ngsLD
+
+#installing prune_graph
+git clone https://github.com/fgvieira/prune_graph.git
+cd prune_graph
+cargo build --release
+cargo test
+
+prune_graph='full_path_to_prune_graph/target/release/prune_graph
+
+angsd -bam bam.list -fai $REF.fai -nInd 4 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -r Scaffold_20: -SNP_pval 1e-6
 
 #filter for ld
 zcat geno.file.mafs.gz | cut -f 1,2 | tail -n +2 > geno.file_positions.txt
 
+#get positions in low LD
+ngsLD --n_threads 10 --verbose 1 --n_ind 4 --n_sites 370205 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
+prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.5" --out unlinked.positions
