@@ -17,11 +17,22 @@ cargo test
 
 prune_graph='full_path_to_prune_graph/target/release/prune_graph
 
-angsd -bam bam.list -fai $REF.fai -nInd 4 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -r Scaffold_20: -SNP_pval 1e-6
+angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
 #filter for ld
 zcat geno.file.mafs.gz | cut -f 1,2 | tail -n +2 > geno.file_positions.txt
 
 #get positions in low LD
-ngsLD --n_threads 10 --verbose 1 --n_ind 4 --n_sites 370205 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
-prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.5" --out unlinked.positions
+ngsLD --n_threads 16 --verbose 1 --n_ind 4 --n_sites 370205 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
+prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.2" --out unlinked.positions
+
+#generate the beagle file with snps filtered for low LD
+angsd -b bam.list -rf unlinked.positions -out geno.lowld -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -gl 2 -fai $REF.fai
+
+#run pca using pcangsd
+pcangsd -b geno.lowld.beagle.gz -t 16 -o out.pcangsd
+
+#in R
+sample.info=read.table("sample.info.txt",header=F)
+out.pca=as.matrix(read.table("~/OneDrive/Downloads/pcangsd.cov"))
+eigenvalues=eigen(out.pca)
