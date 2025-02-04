@@ -4,15 +4,14 @@ git clone --recursive https://github.com/SAMtools/htslib
 git clone https://github.com/ANGSD/ngsRelate
 cd htslib/;make -j2;cd ../ngsRelate;make HTSSRC=../htslib/;
 
-#First, enerate a file with allele frequencies (geno.file.mafs.gz) and a file with genotype likelihoods (geno.file.beagle.gz)
+#First, generate a file with allele frequencies (geno.lowld.mafs.gz) and a file with genotype likelihoods (geno.lowld.beagle.gz)
+#for ngsRelate, snps are assumed to be independent, so we should only include sites in low ld (-rg)
+#unlinked positions is a file with one site per row as: Chr1:1234
 #adjust -nInd, -minInd, and REF variable
 
 REF=path_to_your_reference/reference.fasta
 
-angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
-
-#snps are assumed to be independent, so we should include sites in low ld
-
+angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10 -rf unlinked.positions
 
 #Then we extract the frequency column from the allele frequency file and remove the header (to make it in the format NgsRelate needs)
 
