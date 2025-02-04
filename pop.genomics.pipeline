@@ -1,5 +1,11 @@
 #All analyses are thought for low coverage WGS
 
+#We need to install three programs (angsd, ngsLD, and prune_graph)
+#installing angsd
+git clone https://github.com/ANGSD/angsd.git 
+cd angsd
+make
+
 #installing ngsLD
 #ngsLD website: https://github.com/EFox16/ngsLD-Tutorial
 git clone https://github.com/fgvieira/ngsLD.git
@@ -18,6 +24,7 @@ REF=path_to_your_reference/reference.fasta
 
 #generate a file with genotype likelihoods of high quality sites (variant + invariant) for diversity estimates
 angsd -bam bam.list -doSaf 1 -baq 1 -anc $REF -GL 2 -P 16 -out out
+
 #finding the global estimate
 realSFS out.saf.idx -P 16 -fold 1 > out.sfs
 #calculate theta per site
