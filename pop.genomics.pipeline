@@ -1,13 +1,12 @@
-#All analyses are though for low coverage WGS
-#run pca
-#generate the file with genotype likelihoods of variables sites, input for pcangsd
-#declare all variables
-REF=path_to your_reference
+#All analyses are thought for low coverage WGS
 
-#ngsLD tutorial: https://github.com/EFox16/ngsLD-Tutorial
 #installing ngsLD
-
-ngsLD=full_path_to_ngsLD/ngsLD
+#ngsLD website: https://github.com/EFox16/ngsLD-Tutorial
+git clone https://github.com/fgvieira/ngsLD.git
+cd ngsLD
+make
+make test
+make clean
 
 #installing prune_graph
 git clone https://github.com/fgvieira/prune_graph.git
@@ -15,16 +14,17 @@ cd prune_graph
 cargo build --release
 cargo test
 
-prune_graph='full_path_to_prune_graph/target/release/prune_graph
-
+#generate a file with genotype likelihoods of high quality snps with maf> 0.05
+#The number of individuals (-nInd) and the minimum number of individuals to include a snp (-minInd) need to be adjusted
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
-#filter for ld
+#make a list of positions from the .mafs file
 zcat geno.file.mafs.gz | cut -f 1,2 | tail -n +2 > geno.file_positions.txt
 
 #get positions in low LD
-ngsLD --n_threads 16 --verbose 1 --n_ind 4 --n_sites 370205 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
-prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.2" --out unlinked.positions
+#adjust --nInd and --n_sites
+full_path/ngsLD --n_threads 30 --verbose 1 --n_ind 20 --n_sites 10000 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
+full_path/prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.2" --out unlinked.positions
 
 #generate the beagle file with snps filtered for low LD
 angsd -b bam.list -rf unlinked.positions -out geno.lowld -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -gl 2 -fai $REF.fai
@@ -33,6 +33,9 @@ angsd -b bam.list -rf unlinked.positions -out geno.lowld -doMajorMinor 1 -doPost
 pcangsd -b geno.lowld.beagle.gz -t 16 -o out.pcangsd
 
 #in R
-sample.info=read.table("sample.info.txt",header=F)
-out.pca=as.matrix(read.table("~/OneDrive/Downloads/pcangsd.cov"))
+samples.info=read.table("sample.info.txt",header=F) #sample.info.txt is a file with the name of the samples in a single column, with no header
+out.pca=as.matrix(read.table("~/OneDrive/Downloads/out.pcangsd.cov"))
 eigenvalues=eigen(out.pca)
+plot(eigenvalues$vectors)
+out.pca=cbind(samples.info, eigenvalues$vectors[,1:10)
+colnames(out.pca)=c("sample","PC1",PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10")
