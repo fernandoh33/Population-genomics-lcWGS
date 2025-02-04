@@ -4,8 +4,8 @@ git clone --recursive https://github.com/SAMtools/htslib
 git clone https://github.com/ANGSD/ngsRelate
 cd htslib/;make -j2;cd ../ngsRelate;make HTSSRC=../htslib/;
 
-#First, we need to generate a file with allele frequencies (geno.file.mafs.gz) and a file with genotype likelihoods (geno.file.beagle.gz)
-#adjust -nInd, -minInd, and reference path
+#First, enerate a file with allele frequencies (geno.file.mafs.gz) and a file with genotype likelihoods (geno.file.beagle.gz)
+#adjust -nInd, -minInd, and REF variable
 
 REF=path_to_your_reference/reference.fasta
 
