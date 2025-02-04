@@ -11,11 +11,14 @@ REF=path_to_your_reference/reference.fasta
 
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
-# Then we extract the frequency column from the allele frequency file and remove the header (to make it in the format NgsRelate needs)
+#snps are assumed to be independent, so we should include sites in low ld
+
+
+#Then we extract the frequency column from the allele frequency file and remove the header (to make it in the format NgsRelate needs)
 
 zcat geno.file.mafs.gz | cut -f5 |sed 1d > allele.freq
 
-# run NgsRelate
+#run NgsRelate
 #adjust -n (number of individuals) and full_path/
 
 full_path/ngsRelate  -G geno.file.beagle.gz -n 20 -f allele.freq  -O out.relatedness
