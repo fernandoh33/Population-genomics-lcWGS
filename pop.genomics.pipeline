@@ -29,8 +29,8 @@ REF=path_to_your_reference/reference.fasta
 
 #generate a file with genotype likelihoods of high quality sites (variant + invariant) for estimating diversity statistics
 #if no ancestral reference is available, the sfs is folded, and the reference is used as ancestral, -ref need also be provided for adjusting base qualities (-baq 1)
-
-angsd -bam bam.list -doSaf 1 -baq 1 -anc $REF -ref $REF -GL 2 -P 16 -minMapQ 30 -minQ 20 -out out
+#adjust -nInd -minInd
+angsd -bam bam.list -nInd 20 -minInd 10 -doSaf 1 -baq 1 -anc $REF -ref $REF -GL 2 -P 16 -minMapQ 30 -minQ 20 -out all.sites
 
 #finding the global estimate
 
