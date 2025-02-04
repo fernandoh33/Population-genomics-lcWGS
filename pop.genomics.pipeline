@@ -16,6 +16,7 @@ cargo test
 
 #generate a file with genotype likelihoods of high quality snps with maf> 0.05
 #The number of individuals (-nInd) and the minimum number of individuals to include a snp (-minInd) need to be adjusted
+REF=path_to_your_reference/reference.fasta
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
 #make a list of positions from the .mafs file
