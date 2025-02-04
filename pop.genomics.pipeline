@@ -1,6 +1,6 @@
-#All analyses are thought for low coverage WGS
+#Population genomics analyses using low coverage WGS
 
-#We need to install three programs (angsd, ngsLD, and prune_graph)
+#First, we need to install three programs: angsd for most of the analyses, ngsLD and prune_graph for ld pruning
 #installing angsd
 git clone https://github.com/ANGSD/angsd.git 
 cd angsd
@@ -20,28 +20,39 @@ cd prune_graph
 cargo build --release
 cargo test
 
+#Once the three programs are installed and working, we can start the analyses 
+
 REF=path_to_your_reference/reference.fasta
 
-#generate a file with genotype likelihoods of high quality sites (variant + invariant) for diversity estimates
-angsd -bam bam.list -doSaf 1 -baq 1 -anc $REF -GL 2 -P 16 -out out
+#generate a file with genotype likelihoods of high quality sites (variant + invariant) for estimating diversity statistics
+#if no ancestral reference is available, the sfs is folded, and the reference is used as ancestral, -ref need also be provided for adjusting base qualities (-baq 1)
+
+angsd -bam bam.list -doSaf 1 -baq 1 -anc $REF -ref $REF -GL 2 -P 16 -minMapQ 30 -minQ 20 -out out
 
 #finding the global estimate
+
 realSFS out.saf.idx -P 16 -fold 1 > out.sfs
+
 #calculate theta per site
+
 realSFS saf2theta out.saf.idx -sfs out.sfs -outname out
+
 #calculate theta per window, the example is window size 100kb with steps of 20kb but can be changed of course
+
 thetaStat do_stat out.thetas.idx -win 100000 -step 20000  -outnames theta.w100.s20
 
 
-#generate a file with genotype likelihoods of high quality snps with maf> 0.05, only snps are useful for ld estimation
-#The number of individuals (-nInd) and the minimum number of individuals to include a snp (-minInd) need to be adjusted
+#generate a file with genotype likelihoods of high quality snps with maf > 0.05 as invariant sites are useless for ld estimation
+#adjust -nInd and -minInd 
+
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
 #make a list of positions from the .mafs file
+
 zcat geno.file.mafs.gz | cut -f 1,2 | tail -n +2 > geno.file_positions.txt
 
 #get positions in low LD
-#adjust --nInd and --n_sites
+#adjust full_path, --nInd, and --n_sites
 full_path/ngsLD --n_threads 30 --verbose 1 --n_ind 20 --n_sites 10000 --geno geno.file.beagle.gz --probs --pos geno.file_positions.txt --max_kb_dist 50 --min_maf 0.05 --extend_out| sort -k 1,1Vr -k 2,2V > testLD.ld
 full_path/prune_graph --header --in testLD.ld --weight-field "r2" --weight-filter "dist <= 50000 && r2 >= 0.2" --out unlinked.positions
 
