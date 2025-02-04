@@ -14,9 +14,20 @@ cd prune_graph
 cargo build --release
 cargo test
 
-#generate a file with genotype likelihoods of high quality snps with maf> 0.05
-#The number of individuals (-nInd) and the minimum number of individuals to include a snp (-minInd) need to be adjusted
 REF=path_to_your_reference/reference.fasta
+
+#generate a file with genotype likelihoods of high quality sites (variant + invariant) for diversity estimates
+angsd -bam bam.list -doSaf 1 -baq 1 -anc $REF -GL 2 -P 16 -out out
+#finding the global estimate
+realSFS out.saf.idx -P 16 -fold 1 > out.sfs
+#calculate theta per site
+realSFS saf2theta out.saf.idx -sfs out.sfs -outname out
+#calculate theta per window, the example is window size 100kb with steps of 20kb but can be changed of course
+thetaStat do_stat out.thetas.idx -win 100000 -step 20000  -outnames theta.w100.s20
+
+
+#generate a file with genotype likelihoods of high quality snps with maf> 0.05, only snps are useful for ld estimation
+#The number of individuals (-nInd) and the minimum number of individuals to include a snp (-minInd) need to be adjusted
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
 
 #make a list of positions from the .mafs file
@@ -32,6 +43,10 @@ angsd -b bam.list -rf unlinked.positions -out geno.lowld -doMajorMinor 1 -doPost
 
 #run pca using pcangsd
 pcangsd -b geno.lowld.beagle.gz -t 16 -o out.pcangsd
+
+#run ngsadmix, ngsadmix is within angsd, so no need to install
+for i in `seq 2 10`;do NGSadmix -likes geno.lowld.beagle.gz -K $i -outfiles out.admixure.K$i -P 10;done
+#the files with admixture proportions are out.admixture.K2.qopt
 
 #in R
 samples.info=read.table("sample.info.txt",header=F) #sample.info.txt is a file with the name of the samples in a single column, with no header
