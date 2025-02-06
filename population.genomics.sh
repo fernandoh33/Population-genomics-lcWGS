@@ -50,7 +50,7 @@ angsd -b bam.list -rf unlinked.positions -out geno.lowld -doMajorMinor 1 -doPost
 pcangsd -b geno.lowld.beagle.gz -t 16 -o out.pcangsd
 #run ngsadmix, ngsadmix is within angsd, so no need to install
 #the output files with admixture proportions are out.admixture.K*.qopt
-for i in `seq 2 10`;do NGSadmix -likes geno.lowld.beagle.gz -K $i -outfiles out.admixure.K$i -P 10;done
+for i in `seq 1 10`;do NGSadmix -likes geno.lowld.beagle.gz -K $i -outfiles out.admixure.K$i -P 10;done
 #in R
 samples.info=read.table("sample.info.txt",header=F) #sample.info.txt is a file with the name of the samples in a single column, with no header
 out.pca=as.matrix(read.table("~/OneDrive/Downloads/out.pcangsd.cov"))
