@@ -6,7 +6,8 @@
 #SBATCH --cpus-per-task=24
 
 #Population genomics analyses using low coverage WGS
-#First, we need to install three programs: angsd for most of the analyses, ngsLD and prune_graph for ld pruning
+#First, we need to install four programs: angsd for most of the analyses,
+#ngsLD and prune_graph for ld pruning, and degenotate to extract the 4-fold degenerated sites
 #installing angsd
 git clone https://github.com/ANGSD/angsd.git 
 cd angsd
@@ -18,12 +19,16 @@ cd ngsLD
 make
 make test
 make clean
+#installing degenotate
+#degenotate website: https://github.com/harvardinformatics/degenotate
+git clone https://github.com/harvardinformatics/degenotate
+degenotate/degenotate.py 
 #installing prune_graph
 git clone https://github.com/fgvieira/prune_graph.git
 cd prune_graph
 cargo build --release
 cargo test
-#Once the three programs are installed and working, we can start the analyses 
+#Once the required software is installed and working, we can start the analyses 
 REF=path_to_your_reference/reference.fasta
 #generate a file with genotype likelihoods of high quality sites (variant + invariant) for estimating diversity statistics
 #if no ancestral reference is available, the sfs is folded, and the reference is used as ancestral, -ref need also be provided for adjusting base qualities (-baq 1)
