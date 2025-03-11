@@ -23,6 +23,11 @@ make clean
 #degenotate website: https://github.com/harvardinformatics/degenotate
 git clone https://github.com/harvardinformatics/degenotate
 degenotate/degenotate.py 
+#extract 4-fold degenerate sites
+mkdir out.degenotate
+python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
+#Extract four fold degenerate sites from the beagle file, taken from https://github.com/Brandon-Thomas-Hendrickson
+zcat $ANGSDDIR/yourfile.beagle.gz | awk 'NR==FNR {a[$1]; next} $1 in a' out.degenotate/degen_4fold.bed - | gzip > $ANGSDDIR/yourfile.beagle.gz
 #installing prune_graph
 git clone https://github.com/fgvieira/prune_graph.git
 cd prune_graph
