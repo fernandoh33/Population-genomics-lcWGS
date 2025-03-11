@@ -26,8 +26,7 @@ degenotate/degenotate.py
 #extract 4-fold degenerate sites
 mkdir out.degenotate
 python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
-#Extract four fold degenerate sites from the beagle file, taken from https://github.com/Brandon-Thomas-Hendrickson
-zcat $ANGSDDIR/yourfile.beagle.gz | awk 'NR==FNR {a[$1]; next} $1 in a' out.degenotate/degen_4fold.bed - | gzip > $ANGSDDIR/yourfile.beagle.gz
+awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 #installing prune_graph
 git clone https://github.com/fgvieira/prune_graph.git
 cd prune_graph
@@ -45,6 +44,12 @@ realSFS out.saf.idx -P 16 -fold 1 > out.sfs
 realSFS saf2theta out.saf.idx -sfs out.sfs -outname out
 #calculate theta per window, the example is window size 100kb with steps of 20kb but can be changed of course
 thetaStat do_stat out.thetas.idx -win 100000 -step 20000  -outnames theta.w100.s20
+#extract 4-fold degenerate sites
+mkdir out.degenotate
+python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
+awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
+#Generate a beagle file with only 4-fold degenerate sites
+angsd -bam bam.list -rf 4fold_positions -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.4fold -gl 2 -minMapQ 30 -minQ 20 -minInd 10
 #generate a file with genotype likelihoods of high quality snps with maf > 0.05 as invariant sites are useless for ld estimation
 #adjust -nInd and -minInd 
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
