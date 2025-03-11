@@ -23,10 +23,6 @@ make clean
 #degenotate website: https://github.com/harvardinformatics/degenotate
 git clone https://github.com/harvardinformatics/degenotate
 degenotate/degenotate.py 
-#extract 4-fold degenerate sites
-mkdir out.degenotate
-python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
-awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 #installing prune_graph
 git clone https://github.com/fgvieira/prune_graph.git
 cd prune_graph
@@ -49,6 +45,10 @@ mkdir out.degenotate
 python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
 awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 #Generate a beagle file with only 4-fold degenerate sites
+#extract 4-fold degenerate sites
+mkdir out.degenotate
+python degenotate.py -a annotation.file.gff -g $REF -x 4 -o out.degenotate/
+awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 angsd -bam bam.list -rf 4fold_positions -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.4fold -gl 2 -minMapQ 30 -minQ 20 -minInd 10
 #generate a file with genotype likelihoods of high quality snps with maf > 0.05 as invariant sites are useless for ld estimation
 #adjust -nInd and -minInd 
