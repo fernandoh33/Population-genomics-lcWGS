@@ -46,6 +46,8 @@ mkdir out.degenotate
 python degenotate.py -a annotation.file.gff -g $REF -x 4 -o out.degenotate/
 awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 angsd -bam bam.list -rf 4fold_positions -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.4fold -gl 2 -minMapQ 30 -minQ 20 -minInd 10
+
+#generate genotype files with snps in low LD
 #generate a file with genotype likelihoods of high quality snps with maf > 0.05 as invariant sites are useless for ld estimation
 #adjust -nInd and -minInd 
 angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.file -gl 2 -minMapQ 30 -minQ 20 -minMaf 0.05 -SNP_pval 1e-6 -minInd 10
