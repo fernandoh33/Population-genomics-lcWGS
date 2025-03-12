@@ -40,10 +40,6 @@ realSFS out.saf.idx -P 16 -fold 1 > out.sfs
 realSFS saf2theta out.saf.idx -sfs out.sfs -outname out
 #calculate theta per window, the example is window size 100kb with steps of 20kb but can be changed of course
 thetaStat do_stat out.thetas.idx -win 100000 -step 20000  -outnames theta.w100.s20
-#extract 4-fold degenerate sites
-mkdir out.degenotate
-python degenotate.py -a [annotation file] -g [genome fasta file] -x 4 -o out.degenotate/
-awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 #Generate a beagle file with only 4-fold degenerate sites
 #extract 4-fold degenerate sites
 mkdir out.degenotate
