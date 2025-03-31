@@ -43,7 +43,7 @@ thetaStat do_stat out.thetas.idx -win 100000 -step 20000  -outnames theta.w100.s
 #Generate a beagle file with only 4-fold degenerate sites
 #extract 4-fold degenerate sites
 mkdir out.degenotate
-python degenotate.py -a annotation.file.gff -g $REF -x 4 -o out.degenotate/
+python degenotate.py -a annotation.file.gff -g $REF -x 4 -o out.degenotate/ -d " "
 awk '{if($5==4) print $1":"$2}' out.degenotate/degeneracy-all-sites.bed 4fold_positions
 angsd -bam bam.list -rf 4fold_positions -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -doGlf 2 -out geno.4fold -gl 2 -minMapQ 30 -minQ 20 -minInd 10
 
