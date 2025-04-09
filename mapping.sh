@@ -51,5 +51,6 @@ for i in $(cat list.samples.txt);
 do bwa mem -t 60 $GENOME $TRIMDIR/$i$S1 $TRIMDIR/$i$S2|samtools view -bh|samtools sort -T tmp -@ 60 -o $BAMDIR/$i'.bam';
 samtools index -@ 60 $BAMDIR/$i'.bam';
 bamtools stats -in $BAMDIR/$i'.bam' > $BAMDIR/$i'_bamstats.txt';
-qualimap bamqc -bam $BAMDIR/${i}'.bam' -outdir $BAMDIR/${i}_qualimap -outfile ${i}_qualimap_report.txt;
+qualimap bamqc -bam $BAMDIR/${i}'.bam' -outdir $BAMDIR/${i}_qualimap -outfile ${i}_qualimap_report.txt -nt 60;
+
 done
