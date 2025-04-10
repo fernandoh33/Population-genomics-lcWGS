@@ -7,6 +7,8 @@
 
 mkdir bam.files trimmed.reads out.fastqc out.fastqc.trimmed
 
+export JAVA_TOOL_OPTIONS="-Xms256m -Xmx2g"
+
 RAW=fastq.files
 TRIMDIR=trimmed.samples
 GENOME=reference/your_reference.fasta
