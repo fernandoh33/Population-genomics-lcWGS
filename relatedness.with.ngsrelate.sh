@@ -21,4 +21,4 @@ angsd -bam bam.list -fai $REF.fai -nInd 20 -doMajorMinor 1 -doPost 1 -doMaf 1 -d
 zcat geno.lowld.mafs.gz | cut -f6 |sed 1d > allele.freq
 #run NgsRelate
 #adjust -n (number of individuals) and full_path/
-full_path/ngsRelate  -G geno.lowld.beagle.gz -n 20 -f allele.freq  -O out.relatedness -z samples.list
+full_path/ngsRelate  -G geno.lowld.beagle.gz -n 20 -f allele.freq  -O out.relatedness -z samples.list -t 8
