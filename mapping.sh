@@ -31,13 +31,7 @@ bwa index $GENOME
 #Create Sequence List
 #ls $RAW | grep $S1 | sed 's/_R1.fastq.gz//' | sort -u > list.samples.txt
 
-#Run FastQC, you can avoid this step and check the quality of processed reads, after removing adapters and duplicates
-for i in $(cat list.samples.txt);
-do fastqc $RAW/$i$S1 -o out.fastqc/;
-fastqc $RAW/$i$S2 -o out.fastqc/;
-done
-
-#Remove adapters and duplicates
+#Remove adapters, duplicates, poly Gs, and low quality bases
 for i in $(cat list.samples.txt);
 do fastp -i $RAW/$i$S1 -I $RAW/$i$S2 -o $TRIMDIR/$i$S1 -O $TRIMDIR/$i$S2 --cut_right --dedup -h $TRIMDIR/$i'.html' -g -w 60;
 done
@@ -54,5 +48,4 @@ do bwa mem -t 60 $GENOME $TRIMDIR/$i$S1 $TRIMDIR/$i$S2|samtools view -bh|samtool
 samtools index -@ 60 $BAMDIR/$i'.bam';
 bamtools stats -in $BAMDIR/$i'.bam' > $BAMDIR/$i'_bamstats.txt';
 qualimap bamqc -bam $BAMDIR/${i}'.bam' -outdir $BAMDIR/${i}_qualimap -outfile ${i}_qualimap_report.txt -nt 60;
-
 done
